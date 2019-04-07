@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head></head>
-  <body>
-    <!-- <img src="blind-aid-popup.png" /> -->
-    <p id="fillme"></p>
-    <script src="jquery-2.1.3.js"></script>
+  <head>
+  </head>
+  <body style="height:500px; width:500px">
+
+    <div>
+
+      <h2>Navigated Links</h2>
+
+      <ul id="navigated">
+      </ul>
+
+      <h2>Deleted Links</h2>
+
+      <ol id="deleted">
+      </ol>
+
+    </div>
+
+    <div class="col-md-4 center-block">
+      <button id="clearme" type="button" class="btn btn-primary">Clear Cache</button>
+    </div>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="jquery-3.3.1.js"></script>
+    <script src="bootstrap-3.4.0.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

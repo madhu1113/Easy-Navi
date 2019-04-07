@@ -2,27 +2,33 @@
 // History is a internal javscript object. Do not disturb.
 // renamed history as log.
 
-var log = {};
-var navigation = {"count": 0};
+console.log("Madhu Priya from content-script");
+
+var redundancy = {};
+var history_of_events = {"count": 0};
 var prev_entry = {"content": "", "href": ""};
 var trigger = false;
 
 var url = window.location.href;
 var arr = url.split("/");
-var domain = arr[0] + "//" + arr[2];
+var domain = arr[2];
+
+console.log("domain -> ", domain);
 
 setInterval(function(){
 
   var active = document.activeElement;
-  var new_entry = {
-    "href": active.href,
-    "content": active.innerHTML,
-    "type": active.nodeName
-  };
 
   // Only covers Anchor tags, and imgs within anchor tags.
-  if (new_entry.type == "A" && prev_entry.content != new_entry.content)
+  if (active.tagName == "A" && prev_entry.content != active.innerHTML)
   {
+      console.log("am i entering?");
+
+      var new_entry = {
+        "href": active.href,
+        "content": active.innerHTML,
+        "type": active.nodeName
+      };
       // temp.innerHTML, temp.href
       trigger = true;
       console.log("-------------------");
@@ -30,52 +36,64 @@ setInterval(function(){
       prev_entry = new_entry;
 
 
-      var key = navigation["count"];
+      var key = history_of_events["count"];
       var key_string = key + "";
-      navigation[key_string] = new_entry;
-      navigation["count"] = key + 1;
+      history_of_events[key_string] = new_entry;
+      history_of_events["count"] = key + 1;
 
-      if (new_entry.href in log){
-        log[new_entry.href].push(new_entry.content);
+      console.log("history_of_events", history_of_events);
+
+      if (new_entry.href in redundancy){
+        redundancy[new_entry.href].push(new_entry.content);
       } else {
-        log[new_entry.href] = [new_entry.content];
+        redundancy[new_entry.href] = [new_entry.content];
       }
-      console.log(navigation);
+
       // Every time there is an update to log. Background page is updated.
+      // msg = ;
       chrome.runtime.sendMessage({
         "from": "from-content-script",
         "subject": "push-data",
-        "navigation": navigation,
-        "log": log,
+        "history_of_events": history_of_events,
+        "redundancy": redundancy,
         "domain": domain
       });
   }
 
 }, 1000);
 
+var deletions = {};
 
 chrome.runtime.sendMessage({
   "from": "from-content-script",
   "subject": "pull-data",
   "domain": domain
-}, function (json) {
-    console.log("I have been injected. I am taking log data from background js");
-    console.log(json);
-    log = json;
+  }, function (json) {
+    console.log("I have been injected. I am taking redundancy data from background js");
+    redundancy = json;
 
     // Code for deleting elements
 
     $('a').each(function(i){
         var href = $(this).attr('href');
         var content = $(this).html();
-        if (href in log){
-            if(log[href].includes(content)){
-              $(this).remove();
-            } else {
-              console.log(href, " not there in", log);
-            }
 
+        if (href in redundancy){
+            if(redundancy[href].includes(content)){
+              $(this).remove();
+              deletions[href] = content;
+            } else {
+               //console.log(href, " not there in", redundancy);
+            }
+        } else {
+             //console.log(href, " not there in", redundancy);
         }
     });
+});
 
+chrome.runtime.onMessage.addListener(function (msg, sender, callback) {
+    if (msg.from == "from-popup" && msg.subject == "pull-deletions"){
+        console.log("deletions", deletions);
+        callback(deletions);
+    }
 });
