@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, callback) {
             "redundancy": msg.redundancy,
             "history_of_events": msg.history_of_events
           };
-          console.log("Am i collecting?", msg);
+          console.log("Collected ", msg.redundancy);
       } else {
           // Fetch Data
           callback(return_redundancy(msg.domain));

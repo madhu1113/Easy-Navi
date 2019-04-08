@@ -22,7 +22,6 @@ setInterval(function(){
   // Only covers Anchor tags, and imgs within anchor tags.
   if (active.tagName == "A" && prev_entry.content != active.innerHTML)
   {
-      console.log("am i entering?");
 
       var new_entry = {
         "href": active.href,
@@ -30,9 +29,12 @@ setInterval(function(){
         "type": active.nodeName
       };
       // temp.innerHTML, temp.href
+
+      console.log("element on focus", active);
       trigger = true;
       console.log("-------------------");
       console.log(new_entry);
+      console.log("-------------------");
       prev_entry = new_entry;
 
 
@@ -49,6 +51,8 @@ setInterval(function(){
         redundancy[new_entry.href] = [new_entry.content];
       }
 
+      console.log("redundancy", redundancy);
+
       // Every time there is an update to log. Background page is updated.
       // msg = ;
       chrome.runtime.sendMessage({
@@ -60,7 +64,7 @@ setInterval(function(){
       });
   }
 
-}, 1000);
+}, 10);
 
 var deletions = {};
 
@@ -74,20 +78,28 @@ chrome.runtime.sendMessage({
 
     // Code for deleting elements
 
+    counter = 1;
+
     $('a').each(function(i){
-        var href = $(this).attr('href');
+
+        counter = counter + 1;
+        var href = $(this).prop("href");
         var content = $(this).html();
 
-        if (href in redundancy){
-            if(redundancy[href].includes(content)){
-              $(this).remove();
-              deletions[href] = content;
+        //if(counter == 2){
+            if (href in redundancy){
+                 // $(this).remove();
+                if(redundancy[href].includes(content)){
+                  $(this).remove();
+                  deletions[href] = content;
+                  console.log($(this), " there in", redundancy);
+                } else {
+                   console.log($(this), content, " not there in", redundancy);
+                }
             } else {
-               //console.log(href, " not there in", redundancy);
+                 console.log($(this), href, " not there in", redundancy);
             }
-        } else {
-             //console.log(href, " not there in", redundancy);
-        }
+        //}
     });
 });
 
